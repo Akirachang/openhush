@@ -9,7 +9,8 @@
 
 <p align="center">
   Drop in a noisy recording and get back a clean copy, saved right next to the original.<br />
-  Everything runs on your Mac with <a href="https://github.com/Rikorose/DeepFilterNet">DeepFilterNet3</a>. No cloud. No account. No subscription.
+  Everything runs on your Mac with <a href="https://github.com/Rikorose/DeepFilterNet">DeepFilterNet3</a>. No cloud. No account. No subscription.<br />
+  Your audio never leaves your machine.
 </p>
 
 <p align="center">
