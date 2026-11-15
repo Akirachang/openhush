@@ -72,7 +72,7 @@ export default function PreviewPane() {
       <Overview file={file} windowSec={windowSec} />
       <Waveform
         idleText={`Press play to hear ${Math.round(windowSec)} seconds, original vs. cleaned`}
-        renderingText={heavy ? "Rendering with Heavy repair — this takes a few seconds…" : "Rendering preview…"}
+        renderingText={heavy ? "Rendering with Heavy repair. This takes a few seconds…" : "Rendering preview…"}
       />
       <Transport />
     </div>

@@ -101,7 +101,7 @@ export default function SettingsPanel() {
         </div>
         <input id="strength" type="range" min={6} max={100} value={strength} onChange={(e) => setStrength(Number(e.target.value))} />
         <span className="text-[12px] text-muted">
-          {heavy ? "How strongly Heavy repair denoises" : `${strengthFeel(strength)} — lower sounds more natural`}
+          {heavy ? "How strongly Heavy repair denoises" : `${strengthFeel(strength)}. Lower values sound more natural.`}
         </span>
       </Row>
 

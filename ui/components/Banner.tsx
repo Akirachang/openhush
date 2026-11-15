@@ -20,7 +20,7 @@ export default function Banner() {
     return (
       <div className="mx-2 mb-2 flex flex-col gap-2 rounded-[10px] bg-panel px-3 py-2">
         <div className="flex justify-between">
-          <span>Downloading the noise-removal engine — one time, about 28 MB</span>
+          <span>Downloading the noise-removal engine (one time, about 28 MB)</span>
           <span className="font-mono text-[12px]">{pct}%</span>
         </div>
         <div className="h-[2px] overflow-hidden rounded bg-track">
