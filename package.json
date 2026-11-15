@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Local, free AI noise removal for audio and video",
+  "license": "MIT",
   "main": "desktop/dist/main.js",
   "scripts": {
     "setup": "npm install && npm --prefix ui install && cd engine && uv sync",

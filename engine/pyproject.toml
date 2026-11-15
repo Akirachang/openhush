@@ -3,6 +3,7 @@ name = "openhush-engine"
 version = "0.1.0"
 description = "OpenHush audio engine: local AI noise removal (DeepFilterNet3), driven by the desktop app"
 requires-python = ">=3.12,<3.14"
+license = "MIT"
 dependencies = [
     "numpy>=1.26",
     "soundfile>=0.12",

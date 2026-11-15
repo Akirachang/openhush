@@ -92,3 +92,17 @@ To uninstall, delete `OpenHush.app` and the two folders above.
 - **Platform:** it's tested on Apple Silicon only.
 - **Video:** only the main (default) audio track of a video is cleaned.
 - **Heavy repair:** the repaired voice is mono, copied to every channel.
+
+## License
+
+OpenHush is released under the [MIT License](LICENSE).
+
+It relies on other projects, which keep their own licenses. None of them are stored in this repository:
+
+| Component | License | How OpenHush uses it |
+|---|---|---|
+| [DeepFilterNet](https://github.com/Rikorose/DeepFilterNet) (code and model weights) | MIT or Apache-2.0 | `deep-filter` binary downloaded on first launch |
+| [Resemble Enhance](https://github.com/resemble-ai/resemble-enhance) | MIT | Downloaded only if you install Heavy repair |
+| [ffmpeg](https://ffmpeg.org) | LGPL/GPL, depending on the build | Your own installed copy (e.g. Homebrew); not bundled |
+| [uv](https://github.com/astral-sh/uv) | MIT or Apache-2.0 | Bundled inside the packaged app to install Heavy repair |
+| Electron, Next.js, React, numpy, soundfile and other dependencies | Their own (mostly MIT/BSD) | Installed from npm and PyPI |
