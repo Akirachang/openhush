@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { EngineBridge, EngineError, resolveEngineCommand } from "./engine";
+import { Updater } from "./updater";
 
 const DEV_URL = process.env.OPENHUSH_DEV_URL;
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
@@ -34,6 +35,48 @@ let previewDir = "";
 let batchRunning = false;
 let quitting = false;
 let restarts = 0;
+
+const updater = new Updater(
+  (state) => win?.webContents.send("update:state", state),
+  log,
+  () => (batchRunning ? "Finish or cancel the cleaning first, then restart to update." : null),
+);
+
+/** Asks before quitting mid-batch. True when it's fine to quit. */
+function confirmQuitDuringBatch(): boolean {
+  if (!batchRunning) return true;
+  const options: Electron.MessageBoxSyncOptions = {
+    type: "warning",
+    buttons: ["Keep Cleaning", "Stop and Quit"],
+    defaultId: 0,
+    cancelId: 0,
+    message: "OpenHush is still cleaning files.",
+    detail: "If you quit now, the file being cleaned is discarded. Finished files are kept.",
+  };
+  return (win ? dialog.showMessageBoxSync(win, options) : dialog.showMessageBoxSync(options)) === 1;
+}
+
+async function checkForUpdatesManually() {
+  if (!updater.enabled) {
+    await dialog.showMessageBox(win!, {
+      message: "Updates work in the installed app.",
+      detail: "This copy runs from source. Pull the latest code to update it.",
+    });
+    return;
+  }
+  try {
+    const version = await updater.check(true);
+    if (!version) {
+      await dialog.showMessageBox(win!, { message: "You're up to date.", detail: `OpenHush ${app.getVersion()} is the latest version.` });
+    }
+  } catch {
+    await dialog.showMessageBox(win!, {
+      type: "warning",
+      message: "Couldn't check for updates.",
+      detail: "Check your internet connection and try again.",
+    });
+  }
+}
 
 // ------------------------------------------------------------------ preferences (theme)
 
@@ -129,6 +172,10 @@ ipcMain.handle("preview:read", async (_e, p: string) => {
   return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 });
 
+ipcMain.handle("update:get", () => updater.state);
+ipcMain.handle("update:download", () => updater.download());
+ipcMain.handle("update:install", () => updater.install());
+
 ipcMain.handle("theme:get", () => nativeTheme.themeSource);
 ipcMain.handle("theme:set", (_e, mode: ThemeMode) => {
   if (["system", "light", "dark"].includes(mode)) setTheme(mode);
@@ -143,7 +190,21 @@ function send(command: string) {
 function buildMenu() {
   const mode = nativeTheme.themeSource;
   const template: Electron.MenuItemConstructorOptions[] = [
-    { role: "appMenu" },
+    {
+      label: app.name,
+      submenu: [
+        { role: "about" },
+        { label: "Check for Updates…", click: () => void checkForUpdatesManually() },
+        { type: "separator" },
+        { role: "services" },
+        { type: "separator" },
+        { role: "hide" },
+        { role: "hideOthers" },
+        { role: "unhide" },
+        { type: "separator" },
+        { role: "quit" },
+      ],
+    },
     {
       label: "File",
       submenu: [
@@ -206,17 +267,9 @@ function createWindow() {
     return { action: "deny" };
   });
   win.on("close", (e) => {
-    if (!batchRunning || quitting) return;
-    const choice = dialog.showMessageBoxSync(win!, {
-      type: "warning",
-      buttons: ["Keep Cleaning", "Stop and Quit"],
-      defaultId: 0,
-      cancelId: 0,
-      message: "OpenHush is still cleaning files.",
-      detail: "If you quit now, the file being cleaned is discarded. Finished files are kept.",
-    });
-    if (choice === 0) e.preventDefault();
-    else quitting = true;
+    if (quitting) return; // already confirmed in before-quit
+    if (confirmQuitDuringBatch()) quitting = true;
+    else e.preventDefault();
   });
   win.on("closed", () => (win = null));
   void win.loadURL(DEV_URL ?? "app://openhush/index.html");
@@ -266,6 +319,7 @@ app.whenReady().then(async () => {
   contentSecurityPolicy();
   serveUi();
   createWindow();
+  updater.start();
   try {
     await startEngine();
   } catch (e) {
@@ -274,8 +328,15 @@ app.whenReady().then(async () => {
   }
 });
 
-app.on("before-quit", () => {
+// ⌘Q fires before-quit before any window's close event, so the mid-batch question is asked here.
+app.on("before-quit", (e) => {
+  if (quitting) return;
+  if (!confirmQuitDuringBatch()) {
+    e.preventDefault();
+    return;
+  }
   quitting = true;
+  updater.stop();
 });
 app.on("will-quit", (e) => {
   if (engine) {

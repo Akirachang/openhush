@@ -9,19 +9,28 @@ Local, free AI noise removal for audio and video on your Mac. Drop in recordings
 
 ## Install
 
-You need macOS on Apple Silicon, plus [Homebrew](https://brew.sh) ffmpeg, [uv](https://docs.astral.sh/uv/) and Node 22+.
+On a Mac with Apple Silicon, run:
 
 ```bash
-brew install ffmpeg
-curl -LsSf https://astral.sh/uv/install.sh | sh     # if you don't have uv
+brew install ffmpeg      # if you don't have it
+curl -fsSL https://raw.githubusercontent.com/Akirachang/openhush/main/install.sh | bash
+```
+
+This installs the latest release into **Applications** after checking its SHA-256 checksum and signature, then opens it. From then on, OpenHush updates itself (see [Updates](#updates)).
+
+On first launch it downloads the DeepFilterNet3 engine (28 MB, checked against a pinned SHA-256). After that it works offline.
+
+### Build it yourself
+
+You need [uv](https://docs.astral.sh/uv/) and Node 22+ as well:
+
+```bash
 cd ~/Desktop/coding/openhush
 npm run setup                                       # installs JS + Python dependencies
 npm run dist                                        # builds dist/mac-arm64/OpenHush.app
 ```
 
-Drag `dist/mac-arm64/OpenHush.app` into **Applications** and open it like any other app.
-
-On first launch it downloads the DeepFilterNet3 engine (28 MB, checked against a pinned SHA-256). After that it works offline.
+Then drag `dist/mac-arm64/OpenHush.app` into **Applications**.
 
 ### Launch without building the app
 
@@ -50,6 +59,27 @@ Tick **Heavy repair** for very noisy or muffled speech.
 - **Speed:** it runs on the Apple GPU at about 3× real time, compared with about 40× for normal cleaning.
 - **The voice can change.** It rebuilds the voice, so the result can sound slightly different. That's also why Mix is fixed at 100%.
 
+## Updates
+
+OpenHush checks GitHub Releases when it starts and every 6 hours. You can also check yourself with **OpenHush › Check for Updates…**.
+
+1. When a new version is out, a banner shows **OpenHush x.y.z is available**, with **Update** and **What's new**.
+2. **Update** downloads it in the background and checks its SHA-256 checksum, signature and version before using it.
+3. **Restart to update** quits OpenHush, swaps in the new version where the app lives, and reopens it. If you're cleaning files, it waits until they're finished.
+
+Your settings, the downloaded engine and Heavy repair live outside the app, so nothing is downloaded again. If OpenHush can't replace itself (for example, it's running from a read-only folder or straight from Downloads), the banner links to the download instead.
+
+Updates aren't fully silent, because that would need an Apple Developer ID.
+
+## Releasing a new version
+
+```bash
+npm version minor          # or patch / major: bumps package.json and creates the matching v-tag
+git push --follow-tags     # the Release workflow builds and publishes it
+```
+
+[`.github/workflows/release.yml`](.github/workflows/release.yml) builds `OpenHush.app` on an Apple Silicon runner, then publishes `OpenHush-mac-arm64.zip` and its `.sha256` as a GitHub Release with notes generated from the commits. Installed copies pick it up at their next check.
+
 ## How it's built
 
 ```
@@ -71,7 +101,7 @@ openhush/
 npm run test:engine                       # engine: formats, video sync, errors, server protocol (~30 s)
 (cd engine && uv run pytest -m slow)      # 70-minute files + Heavy repair (~5 min)
 npm run test:e2e                          # the real app: add → preview → A/B → clean, cancel, crash recovery, keyboard
-OPENHUSH_APP=dist/mac-arm64/OpenHush.app npx playwright test   # same, against the packaged app
+OPENHUSH_APP=dist/mac-arm64/OpenHush.app npx playwright test   # same, against the packaged app, plus self-update
 ```
 
 `engine/scripts/make_test_media.py` generates the noisy test clips (macOS `say` plus synthetic noise). The tests create them automatically when needed.
@@ -88,7 +118,7 @@ To uninstall, delete `OpenHush.app` and the two folders above.
 
 ## Known limitations
 
-- **Signing:** the app is ad-hoc signed. On another Mac, open it the first time with right-click › Open.
+- **Signing:** the app is ad-hoc signed, not with an Apple Developer ID. The installer and in-app updates download it themselves, so macOS doesn't warn. If you download the zip from the Releases page in a browser instead, open the app the first time with right-click › Open.
 - **Platform:** it's tested on Apple Silicon only.
 - **Video:** only the main (default) audio track of a video is cleaned.
 - **Heavy repair:** the repaired voice is mono, copied to every channel.

@@ -1,7 +1,7 @@
 {
   "name": "openhush",
   "productName": "OpenHush",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Local, free AI noise removal for audio and video",
   "license": "MIT",
@@ -19,7 +19,8 @@
     "typecheck": "tsc -p desktop --noEmit && npm --prefix ui exec -- tsc --noEmit -p ui",
     "build:engine": "build/build-engine.sh",
     "icon": "electron build/make-icon.cjs && build/make-icns.sh",
-    "dist": "npm run build:ui && npm run build:desktop && npm run build:engine && electron-builder --mac dir"
+    "dist": "npm run build:ui && npm run build:desktop && npm run build:engine && electron-builder --mac dir --publish never",
+    "pack:zip": "cd dist/mac-arm64 && ditto -c -k --sequesterRsrc --keepParent OpenHush.app ../OpenHush-mac-arm64.zip && cd .. && shasum -a 256 OpenHush-mac-arm64.zip > OpenHush-mac-arm64.zip.sha256"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",
