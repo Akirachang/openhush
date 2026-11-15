@@ -66,6 +66,8 @@ jobs:
           npm --prefix ui ci
           cd engine && uv sync --frozen --python "$(which python3.12)"
       - name: Build OpenHush.app (as in a release)
+        env:
+          CSC_FOR_PULL_REQUEST: "true"   # electron-builder skips signing on pull requests otherwise
         run: npm run dist -- -c.mac.icon=build/OpenHush.icon
       - name: Check the bundle
         run: |
