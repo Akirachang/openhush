@@ -1,4 +1,4 @@
-"""OpenHush engine server — spawned by the desktop app, speaks newline-delimited JSON on stdin/stdout.
+"""OpenHush engine server: spawned by the desktop app, speaks newline-delimited JSON on stdin/stdout.
 
     request  {"id": 1, "method": "probe", "params": {"path": "/a/b.mp4"}}
     reply    {"id": 1, "result": {...}}   or   {"id": 1, "error": {"message": "...", "details": "..."}}

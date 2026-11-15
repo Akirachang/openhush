@@ -60,7 +60,7 @@ def friendly(exc: BaseException) -> HushError:
             return OutputError("Not enough disk space to save the cleaned file.", str(exc))
         if exc.errno in (errno.EACCES, errno.EPERM, errno.EROFS):
             return OutputError(
-                "Can't save next to the original — the folder is read-only or not accessible.",
+                "Can't save next to the original. The folder is read-only or not accessible.",
                 str(exc),
             )
         if exc.errno == errno.ENOENT:

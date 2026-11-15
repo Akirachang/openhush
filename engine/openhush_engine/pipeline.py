@@ -390,7 +390,7 @@ def _run(info: MediaInfo, settings: Settings, report: Progress, cancel: CancelTo
     src = info.path
     folder = src.parent
     if not os.access(folder, os.W_OK):
-        raise OutputError(f"Can't save next to “{src.name}” — that folder is read-only.")
+        raise OutputError(f"Can't save next to “{src.name}” because that folder is read-only.")
     _check_space(info, folder)
 
     final_name = output_path_for(src)

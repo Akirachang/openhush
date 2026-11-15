@@ -12,7 +12,7 @@ export default function EmptyState() {
         <div aria-hidden="true" className="mt-3 h-[2px] w-11 bg-red" />
       </div>
       <p className="max-w-[440px] text-[14px] leading-relaxed text-muted">
-        Everything runs on this Mac. Cleaned copies are saved next to the originals as <span className="font-mono text-[12px] text-ink">name_clean</span> — originals are never touched.
+        Everything runs on this Mac. Cleaned copies are saved next to the originals as <span className="font-mono text-[12px] text-ink">name_clean</span>. Originals are never touched.
       </p>
       <div className="flex items-center gap-4">
         <button type="button" onClick={() => void browse()} className="h-10 rounded-[10px] bg-btn1 px-4 font-semibold text-btn1-ink">

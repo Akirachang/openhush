@@ -41,7 +41,7 @@ MARKER = HEAVY_DIR / "installed.json"
 WORKER_SCRIPT = (Path(getattr(sys, "_MEIPASS", "")) / "openhush_engine" / "heavy_worker.py"
                  if getattr(sys, "frozen", False) else Path(__file__).with_name("heavy_worker.py"))
 
-# Versions verified to run Resemble Enhance on Apple GPUs (its own pins — torch 2.1.1 — fail on MPS).
+# Versions verified to run Resemble Enhance on Apple GPUs (its own pin, torch 2.1.1, fails on MPS).
 PACKAGES = [
     "torch==2.8.0", "torchaudio==2.8.0", "numpy==1.26.4", "librosa==0.11.0", "omegaconf==2.4.0",
     "scipy==1.17.1", "soundfile==0.14.0", "matplotlib==3.11.2", "pandas==3.0.6", "celluloid==0.2.0",

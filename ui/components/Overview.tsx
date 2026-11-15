@@ -74,9 +74,9 @@ export default function Overview({ file, windowSec }: { file: FileItem; windowSe
   return (
     <div className="flex flex-col gap-2">
       <div className="label flex justify-between">
-        <span>Whole file — drag to pick a section</span>
+        <span>Whole file · drag to pick a section</span>
         <span>
-          {fmtTime(start)} — {fmtTime(start + win)}
+          {fmtTime(start)} to {fmtTime(start + win)}
         </span>
       </div>
       <canvas

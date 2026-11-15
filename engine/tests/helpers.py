@@ -67,7 +67,7 @@ def sha256(path: Path) -> str:
 
 
 def stream_md5(path: Path, spec: str = "0:v:0") -> str:
-    """MD5 of a stream's packets as stored (no decoding) — identical iff the stream was copied."""
+    """MD5 of a stream's packets as stored, without decoding. Identical iff the stream was copied."""
     return subprocess.run(
         ["ffmpeg", "-v", "error", "-i", str(path), "-map", spec, "-c", "copy", "-f", "md5", "-"],
         capture_output=True, text=True, check=True,
