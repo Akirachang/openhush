@@ -11,10 +11,10 @@ Drop in a noisy recording and get back a clean copy, saved right next to the ori
 
 <p>
   <a href="https://github.com/Akirachang/openhush/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Akirachang/openhush?style=flat-square&labelColor=1A1A19&color=EF5A3C&label=release"></a>
-  <img alt="macOS on Apple Silicon" src="https://img.shields.io/badge/macOS-Apple%20Silicon-EDEDEA?style=flat-square&labelColor=1A1A19&logo=apple&logoColor=EDEDEA">
-  <img alt="Engine: DeepFilterNet3" src="https://img.shields.io/badge/engine-DeepFilterNet3-EDEDEA?style=flat-square&labelColor=1A1A19">
-  <img alt="100% local" src="https://img.shields.io/badge/privacy-100%25%20local-EDEDEA?style=flat-square&labelColor=1A1A19">
-  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/Akirachang/openhush?style=flat-square&labelColor=1A1A19&color=EDEDEA"></a>
+  <img alt="macOS on Apple Silicon" src="https://img.shields.io/badge/macOS-Apple%20Silicon-2E2E2C?style=flat-square&labelColor=1A1A19&logo=apple&logoColor=EDEDEA">
+  <img alt="Engine: DeepFilterNet3" src="https://img.shields.io/badge/engine-DeepFilterNet3-2E2E2C?style=flat-square&labelColor=1A1A19">
+  <img alt="100% local" src="https://img.shields.io/badge/privacy-100%25%20local-2E2E2C?style=flat-square&labelColor=1A1A19">
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/Akirachang/openhush?style=flat-square&labelColor=1A1A19&color=2E2E2C"></a>
 </p>
 
 <img src=".github/assets/banner.png" alt="OpenHush in dark mode: a queue of audio and video files, a cleaned podcast preview, and the Strength and Mix settings" width="100%" />
@@ -104,7 +104,7 @@ Delete `OpenHush.app`, then remove `~/Library/Application Support/OpenHush/` and
 5. **Clean.** Press **Clean N files** (**⌘↩**). Double-click a finished file to show it in Finder.
 
 <p align="center">
-  <img src=".github/assets/ab-compare.gif" alt="Switching between Original and Cleaned while the preview plays: the noisy waveform becomes clean speech with silent gaps" width="720" />
+  <img src=".github/assets/ab-compare.gif" alt="Switching between Original and Cleaned while the preview plays: the noisy waveform becomes clean speech with silent gaps" width="560" />
   <br />
   <sub>Switching between Original and Cleaned during playback. The noise floor between words disappears.</sub>
 </p>
