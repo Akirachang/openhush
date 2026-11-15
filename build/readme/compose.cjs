@@ -95,7 +95,7 @@ function banner() {
       </div>
       <div style="position:absolute;left:64px;top:122px;display:flex;flex-direction:column;gap:8px">
         <span style="font-size:22px;font-weight:500;letter-spacing:-.03em;color:${C.muted}">AI noise removal for audio and video</span>
-        <h1 style="font-size:66px;font-weight:600;line-height:1;letter-spacing:-.045em">Clear voice. Nothing uploaded.</h1>
+        <h1 style="font-size:66px;font-weight:600;line-height:1;letter-spacing:-.045em">Remove Noise, for free</h1>
         <div class="bar" style="margin-top:14px"></div>
       </div>
       <div style="position:absolute;left:64px;top:300px">${windowFrame("preview.png", 1072)}</div>
@@ -128,7 +128,7 @@ function social() {
       <div style="position:absolute;left:80px;top:150px;width:470px;display:flex;flex-direction:column;gap:14px">
         <span style="display:flex;align-items:center;gap:10px;margin-bottom:22px">${mark(44, { simple: true })}
           <span style="font-size:28px;font-weight:700;letter-spacing:-.03em">OpenHush</span></span>
-        <h1 style="font-size:54px;font-weight:600;line-height:1.02;letter-spacing:-.045em">Clear voice.<br>Nothing uploaded.</h1>
+        <h1 style="font-size:54px;font-weight:600;line-height:1.02;letter-spacing:-.045em">Remove Noise,<br>for free</h1>
         <div class="bar" style="margin-top:10px"></div>
         <span style="font-size:20px;font-weight:500;letter-spacing:-.02em;line-height:1.4;color:${C.muted};margin-top:10px">
           Local AI noise removal for audio and video on macOS.</span>
