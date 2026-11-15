@@ -30,11 +30,12 @@ jobs:
 
       - name: Render each appearance with Icon Composer
         run: |
-          ictool="$(find "$(xcode-select -p)/.." -name ictool -type f 2>/dev/null | head -1)"
+          ictool="$(find "$(xcode-select -p)/../Applications" -path "*Icon Composer.app/*" -name ictool -type f | head -1)"
           echo "ictool: $ictool"
+          "$ictool" --help 2>&1 | head -60 || true
           for r in Default Dark ClearLight ClearDark TintedLight TintedDark; do
             "$ictool" build/OpenHush.icon --export-image --output-file "out/$r.png" \
-              --platform macOS --rendition "$r" --width 512 --height 512 --scale 1
+              --platform macOS --rendition "$r" --width 512 --height 512 --scale 1 || echo "::warning::$r failed"
           done
           ls -la out
 
