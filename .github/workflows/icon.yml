@@ -5,7 +5,7 @@ name: App icon
 
 on:
   pull_request:
-    paths: ["build/OpenHush.icon/**", ".github/workflows/icon.yml"]
+    paths: ["build/OpenHush.icon/**", ".github/workflows/icon.yml", ".github/workflows/release.yml"]
   workflow_dispatch:
 
 jobs:
@@ -43,3 +43,38 @@ jobs:
         with:
           name: icon-preview
           path: out/
+
+  # Builds the app the same way the Release workflow does and checks the icon made it into the bundle.
+  package:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            ui/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix ui ci
+          cd engine && uv sync --frozen --python "$(which python3.12)"
+      - name: Build OpenHush.app (as in a release)
+        run: npm run dist -- -c.mac.icon=build/OpenHush.icon
+      - name: Check the bundle
+        run: |
+          app=dist.noindex/mac-arm64/OpenHush.app
+          plist="$app/Contents/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconName' "$plist")" = Icon
+          test -s "$app/Contents/Resources/Assets.car"
+          test -s "$app/Contents/Resources/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' "$plist")"
+          assetutil --info "$app/Contents/Resources/Assets.car" | grep -o '"Appearance" : "[^"]*"' | sort | uniq -c
+          assetutil --info "$app/Contents/Resources/Assets.car" | grep -q NSAppearanceNameDarkAqua
+          codesign --verify --deep --strict "$app"
+          echo "OpenHush.app has the light/dark icon and a valid signature"
