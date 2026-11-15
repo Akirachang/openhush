@@ -27,10 +27,10 @@ You need [uv](https://docs.astral.sh/uv/) and Node 22+ as well:
 ```bash
 cd ~/Desktop/coding/openhush
 npm run setup                                       # installs JS + Python dependencies
-npm run dist                                        # builds dist/mac-arm64/OpenHush.app
+npm run dist                                        # builds dist.noindex/mac-arm64/OpenHush.app
 ```
 
-Then drag `dist/mac-arm64/OpenHush.app` into **Applications**.
+Then drag `dist.noindex/mac-arm64/OpenHush.app` into **Applications**.
 
 ### Launch without building the app
 
@@ -101,7 +101,7 @@ openhush/
 npm run test:engine                       # engine: formats, video sync, errors, server protocol (~30 s)
 (cd engine && uv run pytest -m slow)      # 70-minute files + Heavy repair (~5 min)
 npm run test:e2e                          # the real app: add → preview → A/B → clean, cancel, crash recovery, keyboard
-OPENHUSH_APP=dist/mac-arm64/OpenHush.app npx playwright test   # same, against the packaged app, plus self-update
+OPENHUSH_APP=dist.noindex/mac-arm64/OpenHush.app npx playwright test   # same, against the packaged app, plus self-update
 ```
 
 `engine/scripts/make_test_media.py` generates the noisy test clips (macOS `say` plus synthetic noise). The tests create them automatically when needed.

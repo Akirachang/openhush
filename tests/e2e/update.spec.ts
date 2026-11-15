@@ -1,10 +1,10 @@
 // In-app updates. The self-update tests need the packaged app:
-//   npm run dist && OPENHUSH_APP=dist/mac-arm64/OpenHush.app npx playwright test update
+//   npm run dist && OPENHUSH_APP=dist.noindex/mac-arm64/OpenHush.app npx playwright test update
 // They install a copy into a temporary "Applications" folder and serve a fake newer release locally.
 import { _electron as electron, expect, test } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { createReadStream, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs";
+import { createReadStream, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
@@ -13,6 +13,7 @@ import { isNewer } from "../../desktop/version";
 
 const PACKAGED = process.env.OPENHUSH_APP;
 const ASSET = "OpenHush-mac-arm64.zip";
+const LSREGISTER = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister";
 
 test("version comparison", () => {
   expect(isNewer("0.2.0", "0.1.0")).toBe(true);
@@ -36,12 +37,14 @@ test.describe("self-update (packaged app)", () => {
   let server: Server;
   let base = "";
   let serveCorrupt = false;
+  const temp: { dirs: string[]; apps: string[] } = { dirs: [], apps: [] };
 
   test.beforeAll(async () => {
     test.setTimeout(300_000);
     current = plist(PACKAGED!, "CFBundleShortVersionString");
     // the "next release": the same app, version 9.9.9, with a marker file, re-signed
     const root = mkdtempSync(path.join(tmpdir(), "openhush-release-"));
+    temp.dirs.push(root);
     const next = path.join(root, "OpenHush.app");
     execFileSync("ditto", [PACKAGED!, next]);
     execFileSync("/usr/libexec/PlistBuddy", ["-c", "Set :CFBundleShortVersionString 9.9.9", path.join(next, "Contents", "Info.plist")]);
@@ -77,13 +80,21 @@ test.describe("self-update (packaged app)", () => {
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   });
 
-  test.afterAll(() => server?.close());
+  // Remove the temporary copies, and tell macOS to forget them so they never show up as extra apps.
+  test.afterAll(() => {
+    server?.close();
+    for (const app of temp.apps) execFileSync(LSREGISTER, ["-u", app], { stdio: "ignore" });
+    for (const dir of temp.dirs) rmSync(dir, { recursive: true, force: true });
+  });
 
   /** Installs a fresh copy of the packaged app into a temporary Applications folder and launches it. */
   async function launchInstalled(relaunch = false) {
-    const apps = path.join(mkdtempSync(path.join(tmpdir(), "openhush-apps-")), "Applications");
+    const root = mkdtempSync(path.join(tmpdir(), "openhush-apps-"));
+    temp.dirs.push(root);
+    const apps = path.join(root, "Applications");
     mkdirSync(apps);
     const installed = path.join(apps, "OpenHush.app");
+    temp.apps.push(realpathSync(root) + "/Applications/OpenHush.app");
     execFileSync("ditto", [PACKAGED!, installed]);
     const app = await electron.launch({
       executablePath: path.join(installed, "Contents", "MacOS", "OpenHush"),

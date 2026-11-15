@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# Build output. The .noindex name keeps Spotlight from listing a second OpenHush next to the installed one.
+dist.noindex/
 desktop/dist/
 build/bin/
 test-results/

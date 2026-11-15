@@ -49,7 +49,7 @@ jobs:
 
       - name: Package
         run: |
-          ditto -c -k --sequesterRsrc --keepParent dist/mac-arm64/OpenHush.app OpenHush-mac-arm64.zip
+          ditto -c -k --sequesterRsrc --keepParent dist.noindex/mac-arm64/OpenHush.app OpenHush-mac-arm64.zip
           shasum -a 256 OpenHush-mac-arm64.zip > OpenHush-mac-arm64.zip.sha256
           cat OpenHush-mac-arm64.zip.sha256
 
