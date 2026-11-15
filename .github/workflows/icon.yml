@@ -1,0 +1,82 @@
+# Checks the light/dark app icon (build/OpenHush.icon) whenever it changes: compiles it exactly as
+# electron-builder does in a release, and renders every appearance with Icon Composer for review.
+# Needs Xcode 26, which local machines with only the Command Line Tools don't have.
+name: App icon
+
+on:
+  pull_request:
+    paths: ["build/OpenHush.icon/**", ".github/workflows/icon.yml", ".github/workflows/release.yml"]
+  workflow_dispatch:
+
+jobs:
+  preview:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile with actool (same arguments as electron-builder)
+        run: |
+          xcrun actool --version
+          mkdir -p out/catalog
+          cp -R build/OpenHush.icon out/Icon.icon
+          xcrun actool out/Icon.icon --compile out/catalog --output-format human-readable-text --notices --warnings \
+            --output-partial-info-plist out/catalog/assetcatalog_generated_info.plist \
+            --app-icon Icon --include-all-app-icons --accent-color AccentColor --enable-on-demand-resources NO \
+            --development-region en --target-device mac --minimum-deployment-target 26.0 --platform macosx
+          rm -rf out/Icon.icon
+          ls -la out/catalog
+          echo "Appearances in Assets.car:"
+          assetutil --info out/catalog/Assets.car | grep -o '"Appearance" : "[^"]*"' | sort | uniq -c
+
+      - name: Render each appearance with Icon Composer
+        run: |
+          ictool="$(find "$(xcode-select -p)/../Applications" -path "*Icon Composer.app/*" -name ictool -type f | head -1)"
+          echo "ictool: $ictool"
+          "$ictool" --help 2>&1 | head -60 || true
+          for r in Default Dark ClearLight ClearDark TintedLight TintedDark; do
+            "$ictool" build/OpenHush.icon --export-image --output-file "out/$r.png" \
+              --platform macOS --rendition "$r" --width 512 --height 512 --scale 1 || echo "::warning::$r failed"
+          done
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: icon-preview
+          path: out/
+
+  # Builds the app the same way the Release workflow does and checks the icon made it into the bundle.
+  package:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            ui/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix ui ci
+          cd engine && uv sync --frozen --python "$(which python3.12)"
+      - name: Build OpenHush.app (as in a release)
+        env:
+          CSC_FOR_PULL_REQUEST: "true"   # electron-builder skips signing on pull requests otherwise
+        run: npm run dist -- -c.mac.icon=build/OpenHush.icon
+      - name: Check the bundle
+        run: |
+          app=dist.noindex/mac-arm64/OpenHush.app
+          plist="$app/Contents/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconName' "$plist")" = Icon
+          test -s "$app/Contents/Resources/Assets.car"
+          test -s "$app/Contents/Resources/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' "$plist")"
+          assetutil --info "$app/Contents/Resources/Assets.car" | grep -o '"Appearance" : "[^"]*"' | sort | uniq -c
+          assetutil --info "$app/Contents/Resources/Assets.car" | grep -q NSAppearanceNameDarkAqua
+          codesign --verify --deep --strict "$app"
+          echo "OpenHush.app has the light/dark icon and a valid signature"

@@ -55,7 +55,7 @@ For recordings that are badly damaged, an optional **Heavy repair** mode uses [R
 - **Long files:** hour-long recordings are cleaned in chunks, in constant memory.
 - **Heavy repair (optional):** rebuilds badly damaged speech on the Apple GPU.
 - **Self-updating:** new versions install with one click, after their checksum and signature are verified.
-- **Light and dark mode**, or match the system.
+- **Light and dark mode**, or match the system. On macOS 26 the app icon has light, dark, clear and tinted versions too.
 
 ---
 
@@ -278,6 +278,10 @@ OPENHUSH_APP=dist.noindex/mac-arm64/OpenHush.app npx playwright test   # against
 ```
 
 The noisy test clips are generated on demand by `engine/scripts/make_test_media.py`, from macOS `say` plus synthetic noise.
+
+### App icon
+
+The icon is [`build/OpenHush.icon`](build/OpenHush.icon), an [Icon Composer](https://developer.apple.com/icon-composer/) file with light and dark variants. macOS 26 picks the one that matches **System Settings › Appearance › Icon & widget style**. Release builds compile it with Xcode 26. Local builds without Xcode fall back to the static `build/icon.icns`. The **App icon** workflow renders every variant whenever the icon changes.
 
 ### README images
 

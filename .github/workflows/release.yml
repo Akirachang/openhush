@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: macos-latest   # Apple Silicon
+    runs-on: macos-26   # Apple Silicon, with Xcode 26 to compile the light/dark icon
     steps:
       - uses: actions/checkout@v4
 
@@ -44,8 +44,10 @@ jobs:
           npm --prefix ui ci
           cd engine && uv sync --frozen --python "$(which python3.12)"
 
+      # Release builds use the Icon Composer icon, which follows light/dark mode. It needs Xcode 26's actool,
+      # so local builds keep the static build/icon.icns from package.json.
       - name: Build OpenHush.app
-        run: npm run dist
+        run: npm run dist -- -c.mac.icon=build/OpenHush.icon
 
       - name: Package
         run: |
