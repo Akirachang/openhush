@@ -163,3 +163,44 @@ test("changing Strength right after Play still starts playback", async () => {
   await page.getByLabel("Strength").fill("45"); // supersedes the render that is in flight
   await expect(page.getByRole("button", { name: "Pause" })).toBeVisible({ timeout: 60_000 });
 });
+
+test("quitting mid-batch asks first (⌘Q and closing the window)", async () => {
+  await expect(page.getByText("Starting the audio engine…")).toBeHidden({ timeout: 60_000 });
+  const dir = mkdtempSync(path.join(tmpdir(), "openhush-e2e-"));
+  const { execFileSync } = await import("node:child_process");
+  const long = path.join(dir, "long.wav");
+  execFileSync("ffmpeg", ["-v", "error", "-y", "-stream_loop", "17", "-i", path.join(MEDIA, "noisy_48k_mono.wav"), "-c", "copy", long]);
+  await stubOpenDialog([long]);
+  await page.getByRole("button", { name: "Add files" }).first().click();
+  await page.getByRole("button", { name: "Clean 1 file" }).click();
+  await expect(page.getByText(/Cleaning [1-9]\d?%/).first()).toBeVisible({ timeout: 60_000 });
+
+  // answer "Keep Cleaning": the app must stay open
+  await app.evaluate(({ dialog }) => {
+    (globalThis as { asked?: number }).asked = 0;
+    dialog.showMessageBoxSync = ((..._args: unknown[]) => {
+      (globalThis as { asked?: number }).asked! += 1;
+      return 0;
+    }) as typeof dialog.showMessageBoxSync;
+  });
+  await app.evaluate(({ app: a }) => a.quit()); // ⌘Q
+  await page.waitForTimeout(500);
+  expect(await app.evaluate(() => (globalThis as { asked?: number }).asked)).toBe(1);
+  await expect(page.getByText(/Cleaning \d+%/).first()).toBeVisible();
+
+  // closing the window asks too
+  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
+  await page.waitForTimeout(500);
+  expect(await app.evaluate(() => (globalThis as { asked?: number }).asked)).toBe(2);
+  expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1);
+
+  // answer "Stop and Quit": the app closes, and no half-written file is left behind
+  await app.evaluate(({ dialog }) => {
+    dialog.showMessageBoxSync = (() => 1) as typeof dialog.showMessageBoxSync;
+  });
+  const closed = app.waitForEvent("close");
+  await app.evaluate(({ app: a }) => a.quit());
+  await closed;
+  expect(readdirSync(dir)).toEqual(["long.wav"]);
+  await launch(); // so afterEach has an app to close
+});

@@ -20,6 +20,18 @@ const api = {
   getTheme: (): Promise<"system" | "light" | "dark"> => ipcRenderer.invoke("theme:get"),
   setTheme: (mode: "system" | "light" | "dark") => ipcRenderer.invoke("theme:set", mode),
   restartEngine: () => ipcRenderer.invoke("engine:restart"),
+  /** In-app updates from GitHub Releases. */
+  updates: {
+    get: () => ipcRenderer.invoke("update:get"),
+    download: () => ipcRenderer.invoke("update:download"),
+    /** Quits, swaps the app and relaunches. Resolves to a reason string if it can't right now. */
+    install: (): Promise<string | null> => ipcRenderer.invoke("update:install"),
+    onState: (cb: (state: unknown) => void) => {
+      const listener = (_e: unknown, state: unknown) => cb(state);
+      ipcRenderer.on("update:state", listener);
+      return () => ipcRenderer.removeListener("update:state", listener);
+    },
+  },
   onMenu: (cb: (command: string) => void) => {
     const listener = (_e: unknown, command: string) => cb(command);
     ipcRenderer.on("menu", listener);

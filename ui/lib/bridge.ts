@@ -3,6 +3,14 @@ import type { EngineErr } from "./types";
 
 type ThemeMode = "system" | "light" | "dark";
 
+export type UpdateState =
+  | { status: "idle" | "checking"; current: string }
+  | { status: "available"; current: string; version: string; notesUrl: string }
+  | { status: "downloading"; current: string; version: string; fraction: number }
+  | { status: "ready"; current: string; version: string }
+  | { status: "error"; current: string; version?: string; message: string }
+  | { status: "unsupported"; current: string; version: string; notesUrl: string; message: string };
+
 export interface OpenHushApi {
   call(method: string, params?: Record<string, unknown>): Promise<unknown>;
   on(event: string, cb: (data: unknown) => void): () => void;
@@ -13,6 +21,12 @@ export interface OpenHushApi {
   getTheme(): Promise<ThemeMode>;
   setTheme(mode: ThemeMode): Promise<void>;
   restartEngine(): Promise<void>;
+  updates: {
+    get(): Promise<UpdateState>;
+    download(): Promise<void>;
+    install(): Promise<string | null>;
+    onState(cb: (state: UpdateState) => void): () => void;
+  };
   onMenu(cb: (command: string) => void): () => void;
 }
 

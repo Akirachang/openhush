@@ -10,6 +10,7 @@ import PreviewPane from "./PreviewPane";
 import QueuePanel from "./QueuePanel";
 import SettingsPanel from "./SettingsPanel";
 import TitleBar from "./TitleBar";
+import UpdateBanner from "./UpdateBanner";
 
 function isTyping(el: EventTarget | null) {
   return el instanceof HTMLInputElement && !["range", "checkbox", "button"].includes(el.type);
@@ -77,6 +78,7 @@ export default function App() {
       onDrop={onDrop}
     >
       <TitleBar />
+      <UpdateBanner />
       <Banner />
       <div className="flex min-h-0 flex-1 gap-2 px-2 pb-2">
         <QueuePanel />
