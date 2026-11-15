@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+/* Direction D ("Subframe-style"): near-monochrome, floating panels, one small red accent. */
+:root {
+  --app: #f9f9f8;
+  --panel: #ffffff;
+  --canvas: #f0f0ee;
+  --card: #ffffff;
+  --row: #f6f6f5;
+  --chip: #f2f2f0;
+  --ink: #111111;
+  --muted: #6a6a66;
+  --faint: #d6d6d2;
+  --track: #eaeae7;
+  --select: #e3edfc;
+  --btn1: #111111;
+  --btn1-ink: #ffffff;
+  --btn2: #ededeb;
+  --btn2-ink: #111111;
+  --pill: #ffffff;
+  --seg-track: #f2f2f0;
+  --seg-on: #ffffff;
+  --wave-on: #111111;
+  --wave-off: #b3b3ae;
+  --ov-on: #111111;
+  --ov-off: #c9c9c4;
+  --red: #e5482d;
+  --err: #a4410f;
+  --ok: #1f6b4a;
+  --pill-shadow: 0 1px 2px rgba(17, 17, 17, 0.06), 0 8px 24px rgba(17, 17, 17, 0.08);
+  --lift: 0 1px 2px rgba(17, 17, 17, 0.12);
+  --overlay: rgba(249, 249, 248, 0.86);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app: #111110;
+    --panel: #1a1a19;
+    --canvas: #0b0b0a;
+    --card: #1a1a19;
+    --row: #232322;
+    --chip: #2a2a28;
+    --ink: #ededea;
+    --muted: #9a9a95;
+    --faint: #3a3a37;
+    --track: #2e2e2c;
+    --select: #1f2b3d;
+    --btn1: #ededea;
+    --btn1-ink: #111110;
+    --btn2: #2a2a28;
+    --btn2-ink: #ededea;
+    --pill: #232322;
+    --seg-track: #161615;
+    --seg-on: #3a3a37;
+    --wave-on: #ededea;
+    --wave-off: #4e4e4a;
+    --ov-on: #ededea;
+    --ov-off: #3a3a37;
+    --red: #ef5a3c;
+    --err: #f08a5d;
+    --ok: #6fcf9f;
+    --pill-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.45);
+    --lift: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --overlay: rgba(17, 17, 16, 0.86);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-app: var(--app);
+  --color-panel: var(--panel);
+  --color-canvas: var(--canvas);
+  --color-card: var(--card);
+  --color-row: var(--row);
+  --color-chip: var(--chip);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-track: var(--track);
+  --color-select: var(--select);
+  --color-btn1: var(--btn1);
+  --color-btn1-ink: var(--btn1-ink);
+  --color-btn2: var(--btn2);
+  --color-btn2-ink: var(--btn2-ink);
+  --color-pill: var(--pill);
+  --color-seg-track: var(--seg-track);
+  --color-seg-on: var(--seg-on);
+  --color-red: var(--red);
+  --color-err: var(--err);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-inter-tight), "Helvetica Neue", Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --shadow-pill: var(--pill-shadow);
+  --shadow-lift: var(--lift);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--app);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+  overflow: hidden;
+}
+
+/* Electron: the title bar area drags the window; controls inside it must opt out. */
+.drag {
+  -webkit-app-region: drag;
+}
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--ink);
+}
+input[type="checkbox"] {
+  accent-color: var(--ink);
+}
+
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.selectable {
+  user-select: text;
+  cursor: text;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin {
+  animation: spin 0.8s linear infinite;
+}

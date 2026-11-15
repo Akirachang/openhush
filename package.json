@@ -1,0 +1,75 @@
+{
+  "name": "openhush",
+  "productName": "OpenHush",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local, free AI noise removal for audio and video",
+  "main": "desktop/dist/main.js",
+  "scripts": {
+    "setup": "npm install && npm --prefix ui install && cd engine && uv sync",
+    "build:desktop": "node desktop/build.mjs",
+    "build:ui": "npm --prefix ui run build",
+    "dev:ui": "npm --prefix ui run dev -- -p 3123",
+    "dev:app": "node desktop/build.mjs && wait-on -t 120000 http-get://localhost:3123 && cross-env OPENHUSH_DEV_URL=http://localhost:3123 electron .",
+    "dev": "concurrently -k -n ui,app -c gray,blue \"npm:dev:ui\" \"npm:dev:app\"",
+    "start": "npm run build:ui && npm run build:desktop && electron .",
+    "test:engine": "cd engine && uv run pytest",
+    "test:e2e": "npm run build:ui && npm run build:desktop && playwright test",
+    "typecheck": "tsc -p desktop --noEmit && npm --prefix ui exec -- tsc --noEmit -p ui",
+    "build:engine": "build/build-engine.sh",
+    "icon": "electron build/make-icon.cjs && build/make-icns.sh",
+    "dist": "npm run build:ui && npm run build:desktop && npm run build:engine && electron-builder --mac dir"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6",
+    "concurrently": "^10.0.7",
+    "cross-env": "^10.1.0",
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "wait-on": "^9.5.1"
+  },
+  "build": {
+    "appId": "app.openhush.desktop",
+    "productName": "OpenHush",
+    "copyright": "OpenHush",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "desktop/dist/**/*",
+      "package.json",
+      "!**/*.map"
+    ],
+    "extraResources": [
+      {
+        "from": "ui/out",
+        "to": "ui"
+      },
+      {
+        "from": "engine/dist/openhush-engine",
+        "to": "engine/openhush-engine"
+      },
+      {
+        "from": "build/bin",
+        "to": "bin"
+      }
+    ],
+    "asar": true,
+    "mac": {
+      "target": [
+        "dir"
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.music",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "darkModeSupport": true
+    }
+  },
+  "author": "OpenHush"
+}
