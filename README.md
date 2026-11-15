@@ -1,15 +1,18 @@
-<table border="0" cellpadding="0" cellspacing="0">
-  <tr>
-    <td valign="middle"><img src=".github/assets/icon-dark.png" alt="OpenHush logo" width="72" /></td>
-    <td valign="middle"><h1>&nbsp;OpenHush</h1></td>
-  </tr>
-</table>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/wordmark-dark.png" />
+    <img src=".github/assets/wordmark-light.png" alt="OpenHush" width="320" />
+  </picture>
+</p>
 
-**Local, free AI noise removal for audio and video on macOS.**
+<p align="center"><b>Local, free AI noise removal for audio and video on macOS.</b></p>
 
-Drop in a noisy recording and get back a clean copy, saved right next to the original. Everything runs on your Mac with [DeepFilterNet3](https://github.com/Rikorose/DeepFilterNet). No cloud. No account. No subscription. Your audio never leaves your machine.
+<p align="center">
+  Drop in a noisy recording and get back a clean copy, saved right next to the original.<br />
+  Everything runs on your Mac with <a href="https://github.com/Rikorose/DeepFilterNet">DeepFilterNet3</a>. No cloud. No account. No subscription.
+</p>
 
-<p>
+<p align="center">
   <a href="https://github.com/Akirachang/openhush/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Akirachang/openhush?style=flat-square&labelColor=1A1A19&color=EF5A3C&label=release"></a>
   <img alt="macOS on Apple Silicon" src="https://img.shields.io/badge/macOS-Apple%20Silicon-2E2E2C?style=flat-square&labelColor=1A1A19&logo=apple&logoColor=EDEDEA">
   <img alt="Engine: DeepFilterNet3" src="https://img.shields.io/badge/engine-DeepFilterNet3-2E2E2C?style=flat-square&labelColor=1A1A19">

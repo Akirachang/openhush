@@ -1,6 +1,6 @@
 // Frames the raw captures from capture.mjs into the README images, with Electron's own Chromium.
 // Run: npm run readme:assets   (or, after a capture: npx electron build/readme/compose.cjs)
-// Writes .github/assets/{banner,screenshot-batch,social-preview,icon-dark}.png
+// Writes .github/assets/{banner,screenshot-batch,social-preview,wordmark-dark,wordmark-light}.png
 const { app, BrowserWindow } = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -139,28 +139,38 @@ function social() {
   };
 }
 
-/** The app icon on a dark tile, for the README header. */
-function iconDark() {
-  const W = 256, H = 256;
+/** The app icon on a dark tile (the mark from build/icon.svg, recoloured for dark mode). */
+const tile = (size) => `
+  <svg width="${size}" height="${size}" viewBox="0 0 1024 1024">
+    <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A2A28"/><stop offset="1" stop-color="#121211"/></linearGradient></defs>
+    <rect x="40" y="40" width="944" height="944" rx="212" fill="url(#bg)"/>
+    <rect x="41.5" y="41.5" width="941" height="941" rx="210.5" fill="none" stroke="#FFFFFF" stroke-opacity=".1" stroke-width="3"/>
+    <g transform="translate(181 181) scale(6.62)">
+      <circle cx="6.5" cy="57" r="3.5" fill="${C.ink}" opacity=".3"/>
+      <circle cx="18" cy="57" r="4.5" fill="${C.ink}" opacity=".55"/>
+      <path d="${WAVE}" fill="none" stroke="${C.ink}" stroke-width="11" stroke-linecap="round"/>
+      <circle cx="33" cy="57" r="7" fill="${C.red}"/>
+    </g>
+  </svg>`;
+
+/**
+ * The README title: icon + "OpenHush" in the app's type, on a transparent background. It's an image because
+ * GitHub draws borders around tables and under every <h1>. Light and dark variants are swapped with <picture>.
+ */
+function lockup(theme) {
+  const ink = theme === "dark" ? C.ink : "#111111";
   return {
-    W, H,
+    W: 600, H: 140, fit: ".lockup",
     html: page(`
-    <svg width="256" height="256" viewBox="0 0 1024 1024">
-      <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#2A2A28"/><stop offset="1" stop-color="#121211"/></linearGradient></defs>
-      <rect x="40" y="40" width="944" height="944" rx="212" fill="url(#bg)"/>
-      <rect x="41.5" y="41.5" width="941" height="941" rx="210.5" fill="none" stroke="#FFFFFF" stroke-opacity=".1" stroke-width="3"/>
-      <g transform="translate(181 181) scale(6.62)">
-        <circle cx="6.5" cy="57" r="3.5" fill="${C.ink}" opacity=".3"/>
-        <circle cx="18" cy="57" r="4.5" fill="${C.ink}" opacity=".55"/>
-        <path d="${WAVE}" fill="none" stroke="${C.ink}" stroke-width="11" stroke-linecap="round"/>
-        <circle cx="33" cy="57" r="7" fill="${C.red}"/>
-      </g>
-    </svg>`),
+    <div class="lockup" style="display:inline-flex;align-items:center;gap:16px;padding:4px 6px 4px 0">
+      ${tile(76)}
+      <span style="font-size:54px;font-weight:600;letter-spacing:-.045em;line-height:1;color:${ink};padding-bottom:4px">OpenHush</span>
+    </div>`),
   };
 }
 
-async function render(win, name, { W, H, html }, scale = 2, resizeTo) {
+async function render(win, name, { W, H, html, fit }, scale = 2, resizeTo) {
   const file = path.join(OUT, `_${name}.html`);
   fs.writeFileSync(file, html);
   win.setContentSize(W, H);
@@ -168,8 +178,13 @@ async function render(win, name, { W, H, html }, scale = 2, resizeTo) {
   await win.webContents.executeJavaScript(
     "Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode())]).then(() => true)");
   await new Promise((r) => setTimeout(r, 300));
-  let img = await win.webContents.capturePage({ x: 0, y: 0, width: W, height: H });
-  if (img.getSize().width !== W * scale) throw new Error(`${name}: captured at ${img.getSize().width} px, expected ${W * scale}`);
+  // `fit` crops to one element's box instead of the whole canvas
+  const rect = fit
+    ? await win.webContents.executeJavaScript(`(() => { const r = document.querySelector(${JSON.stringify(fit)}).getBoundingClientRect();
+        return { x: Math.floor(r.x), y: Math.floor(r.y), width: Math.ceil(r.width), height: Math.ceil(r.height) }; })()`)
+    : { x: 0, y: 0, width: W, height: H };
+  let img = await win.webContents.capturePage(rect);
+  if (img.getSize().width !== rect.width * scale) throw new Error(`${name}: captured at ${img.getSize().width} px, expected ${rect.width * scale}`);
   if (resizeTo) img = img.resize({ width: resizeTo, quality: "best" });
   fs.writeFileSync(path.join(ASSETS, `${name}.png`), img.toPNG());
   fs.rmSync(file);
@@ -189,7 +204,8 @@ app.whenReady().then(async () => {
   await render(win, "banner", banner());
   await render(win, "screenshot-batch", shot("batch.png"));
   await render(win, "social-preview", social(), 2, 1280);
-  await render(win, "icon-dark", iconDark());
+  await render(win, "wordmark-dark", lockup("dark"));
+  await render(win, "wordmark-light", lockup("light"));
   app.quit();
 }).catch((e) => {
   console.error(e);
