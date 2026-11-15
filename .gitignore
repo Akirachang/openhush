@@ -4,6 +4,8 @@ dist/
 dist.noindex/
 desktop/dist/
 build/bin/
+# Raw captures for the README images (the framed results live in .github/assets/)
+build/readme/out/
 test-results/
 playwright-report/
 .DS_Store
