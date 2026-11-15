@@ -1,0 +1,44 @@
+# Checks the light/dark app icon (build/OpenHush.icon) whenever it changes: compiles it exactly as
+# electron-builder does in a release, and renders every appearance with Icon Composer for review.
+# Needs Xcode 26, which local machines with only the Command Line Tools don't have.
+name: App icon
+
+on:
+  pull_request:
+    paths: ["build/OpenHush.icon/**", ".github/workflows/icon.yml"]
+  workflow_dispatch:
+
+jobs:
+  preview:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile with actool (same arguments as electron-builder)
+        run: |
+          xcrun actool --version
+          mkdir -p out/catalog
+          cp -R build/OpenHush.icon out/Icon.icon
+          xcrun actool out/Icon.icon --compile out/catalog --output-format human-readable-text --notices --warnings \
+            --output-partial-info-plist out/catalog/assetcatalog_generated_info.plist \
+            --app-icon Icon --include-all-app-icons --accent-color AccentColor --enable-on-demand-resources NO \
+            --development-region en --target-device mac --minimum-deployment-target 26.0 --platform macosx
+          rm -rf out/Icon.icon
+          ls -la out/catalog
+          echo "Appearances in Assets.car:"
+          assetutil --info out/catalog/Assets.car | grep -o '"Appearance" : "[^"]*"' | sort | uniq -c
+
+      - name: Render each appearance with Icon Composer
+        run: |
+          ictool="$(find "$(xcode-select -p)/.." -name ictool -type f 2>/dev/null | head -1)"
+          echo "ictool: $ictool"
+          for r in Default Dark ClearLight ClearDark TintedLight TintedDark; do
+            "$ictool" build/OpenHush.icon --export-image --output-file "out/$r.png" \
+              --platform macOS --rendition "$r" --width 512 --height 512 --scale 1
+          done
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: icon-preview
+          path: out/
